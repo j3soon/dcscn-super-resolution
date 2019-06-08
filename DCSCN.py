@@ -378,7 +378,7 @@ class SuperResolution(tf_graph.TensorflowGraph):
         if len(org_image.shape) >= 3 and org_image.shape[2] == 3 and self.channels == 1:
             org_image = util.convert_rgb_to_y(org_image)
 
-        input_image = util.resize_image_by_pil(org_image, 1.0 / self.scale, resampling_method=self.resampling_method)
+        input_image = util.resize_image_by_pil_jpeg(org_image, 1.0 / self.scale, resampling_method=self.resampling_method)
         bicubic_image = util.resize_image_by_pil(input_image, self.scale, resampling_method=self.resampling_method)
 
         if self.max_value != 255.0:

@@ -19,6 +19,8 @@ from scipy import misc
 
 from skimage.measure import compare_psnr, compare_ssim
 
+from io import BytesIO
+
 
 class Timer:
     def __init__(self, timer_count=100):
@@ -198,6 +200,65 @@ def set_image_alignment(image, alignment):
         image = image[:, :, 0:3]
 
     return image
+
+def resize_image_by_pil_jpeg(image, scale, resampling_method="bicubic"):
+    width, height = image.shape[1], image.shape[0]
+    new_width = int(width * scale)
+    new_height = int(height * scale)
+
+    if resampling_method == "bicubic":
+        method = Image.BICUBIC
+    elif resampling_method == "bilinear":
+        method = Image.BILINEAR
+    elif resampling_method == "nearest":
+        method = Image.NEAREST
+    else:
+        method = Image.LANCZOS
+
+    Q = 100
+    buffer = BytesIO()
+
+    if len(image.shape) == 3 and image.shape[2] == 3:
+        image = Image.fromarray(image, "RGB")
+        image = image.resize([new_width, new_height], resample=method)
+        image = np.asarray(image)
+        return image
+
+        img = Image.fromarray(image)
+        img.save(buffer, "JPEG", quality=Q)
+        img_jpeg = Image.open(buffer)
+        # img_jpeg.save('/home/u4828649/test1.jpg', "JPEG", quality=Q)
+        img_jpeg_arr = np.asarray(img_jpeg)
+        return img_jpeg_arr.reshape(image.shape)
+    elif len(image.shape) == 3 and image.shape[2] == 4:
+        # the image may has an alpha channel
+        image = Image.fromarray(image, "RGB")
+        image = image.resize([new_width, new_height], resample=method)
+        image = np.asarray(image)
+        return image
+
+        img = Image.fromarray(image)
+        img.save(buffer, "JPEG", quality=Q)
+        img_jpeg = Image.open(buffer)
+        # img_jpeg.save('/home/u4828649/test2.jpg', "JPEG", quality=Q)
+        img_jpeg_arr = np.asarray(img_jpeg)
+        return img_jpeg_arr.reshape(image.shape)
+    else:
+        image = Image.fromarray(image.reshape(height, width))
+        # image.convert('RGB').save('/home/u4828649/test33.png')
+        image = image.resize([new_width, new_height], resample=method)
+        image = np.asarray(image)
+        image = image.reshape(new_height, new_width, 1)
+
+        img = Image.fromarray(image.reshape(image.shape[0:2]))
+        # img.convert('RGB').save('/home/u4828649/test33.png')
+        img.convert('L').save(buffer, "JPEG", quality=Q)
+        img_jpeg = Image.open(buffer).convert('L')
+        # img_jpeg.save('/home/u4828649/test3.jpg', "JPEG", quality=Q)
+        img_jpeg_arr = np.asarray(img_jpeg)
+        print(image.shape)
+        return img_jpeg_arr.reshape(image.shape)
+    # return image
 
 
 def resize_image_by_pil(image, scale, resampling_method="bicubic"):

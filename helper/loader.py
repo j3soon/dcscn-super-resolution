@@ -27,7 +27,8 @@ def build_image_set(file_path, channels=1, scale=1, convert_ycbcr=True, resampli
     if channels == 1 and true_image.shape[2] == 3 and convert_ycbcr:
         true_image = util.convert_rgb_to_y(true_image)
 
-    input_image = util.resize_image_by_pil(true_image, 1.0 / scale, resampling_method=resampling_method)
+    input_image = util.resize_image_by_pil_jpeg(true_image, 1.0 / scale, resampling_method=resampling_method)
+    # input_image = util.resize_image_by_pil(true_image, 1.0 / scale, resampling_method=resampling_method)
     input_interpolated_image = util.resize_image_by_pil(input_image, scale, resampling_method=resampling_method)
 
     return input_image, input_interpolated_image, true_image
@@ -62,6 +63,7 @@ def build_input_image(image, width=0, height=0, channels=1, scale=1, alignment=0
             image = util.convert_rgb_to_ycbcr(image)
 
     if scale != 1:
+        # image = util.resize_image_by_pil_jpeg(image, 1.0 / scale)
         image = util.resize_image_by_pil(image, 1.0 / scale)
 
     return image
@@ -319,6 +321,7 @@ class DynamicDataSets:
             image = np.fliplr(image)
 
         input_image = util.resize_image_by_pil(image, 1 / self.scale)
+        # input_image = util.resize_image_by_pil_jpeg(image, 1 / self.scale)
         input_bicubic_image = util.resize_image_by_pil(input_image, self.scale)
 
         if max_value != 255:
